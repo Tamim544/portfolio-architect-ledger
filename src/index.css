@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: hsl(222 47% 11%);
+  --color-foreground: hsl(210 40% 98%);
+  --color-primary: hsl(217 91% 60%);
+  --color-secondary: hsl(217 19% 27%);
+  --color-accent: hsl(199 89% 48%);
+}
+
+@layer base {
+  * {
+    @apply border-secondary selection:bg-primary/30;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased overflow-hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Glassmorphism utility */
+.glass {
+  @apply backdrop-blur-md bg-white/5 border border-white/10;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-white/20 rounded-full hover:bg-white/30;
+}
