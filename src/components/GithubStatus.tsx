@@ -1,6 +1,5 @@
-import React from 'react';
 import { useGithub } from '../hooks/useGithub';
-import { Github, GitBranch, Star } from 'lucide-react';
+import { Github } from 'lucide-react';
 
 export const GithubStatus = ({ username }: { username: string }) => {
   const { stats, loading } = useGithub(username);
