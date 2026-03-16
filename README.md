@@ -2,7 +2,7 @@
 
 > **Status:** `SYSTEM_ONLINE` | **Encryption:** `TLS 1.3` | **Environment:** `PRODUCTION_READY`
 
-**Architect Ledger** is a next-generation technical portfolio designed as a living architectural ecosystem. Instead of a static list of projects, it presents your career as an interactive, data-driven map synced in real-time with GitHub.
+Architect Ledger** is a next-generation technical portfolio designed as a living architectural ecosystem. Instead of a static list of projects, it presents your career as an interactive, data-driven map synced in real-time with GitHub.
 
 ## 🚀 Core Systems
 
