@@ -34,7 +34,17 @@ export default function App() {
       newNodes.push({
         id: centralNodeId,
         type: 'input',
-        data: { label: `System Architect: ${stats?.name || 'Tamim Chowdhury'}` },
+        data: { 
+          label: `System Architect: ${stats?.name || 'Tamim Chowdhury'}`,
+          nodeType: 'central',
+          bio: stats?.bio,
+          publicRepos: stats?.public_repos,
+          followers: stats?.followers,
+          following: stats?.following,
+          location: stats?.location,
+          company: stats?.company,
+          profileUrl: stats?.html_url,
+        },
         position: { x: 500, y: 0 },
         className: 'glass rounded-2xl px-8 py-4 text-primary font-black shadow-[0_0_50px_rgba(59,130,246,0.2)] border-primary/50 text-xl uppercase tracking-tighter',
       });
@@ -59,7 +69,13 @@ export default function App() {
         // Language Node
         newNodes.push({
           id: langNodeId,
-          data: { label: lang },
+          data: { 
+            label: lang,
+            nodeType: 'language',
+            repoCount: reposByLanguage[lang].length,
+            repoNames: reposByLanguage[lang].map((r: any) => r.name),
+            totalStars: reposByLanguage[lang].reduce((sum: number, r: any) => sum + (r.stargazers_count || 0), 0),
+          },
           position: { x, y },
           className: 'glass rounded-xl px-6 py-3 border-accent/50 text-sm font-bold uppercase tracking-wider',
         });
@@ -87,10 +103,20 @@ export default function App() {
             id: repoNodeId,
             data: { 
               label: repo.name, 
+              nodeType: 'repo',
               description: repo.description,
               url: repo.html_url,
               stars: repo.stargazers_count,
-              forks: repo.forks_count
+              forks: repo.forks_count,
+              language: repo.language,
+              createdAt: repo.created_at,
+              updatedAt: repo.updated_at,
+              size: repo.size,
+              defaultBranch: repo.default_branch,
+              topics: repo.topics,
+              visibility: repo.visibility,
+              hasPages: repo.has_pages,
+              openIssues: repo.open_issues_count,
             },
             position: { x: rx, y: ry },
             className: 'glass rounded-lg px-4 py-2 text-[11px] border-white/10 hover:border-primary/50 transition-all cursor-pointer shadow-lg',
@@ -222,9 +248,57 @@ export default function App() {
                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                   <Globe size={120} />
                 </div>
-                <p className="text-sm leading-relaxed text-white/70 relative z-10">
-                  {selectedNode.data.description || 'No detailed system logs available for this node.'}
-                </p>
+                <div className="text-sm leading-relaxed text-white/70 relative z-10">
+                  {selectedNode.data.nodeType === 'central' && (
+                    <div className="space-y-2">
+                      <p>{selectedNode.data.bio || 'System Architect & Full-Stack Developer'}</p>
+                      {selectedNode.data.location && <p className="text-white/40 text-xs">📍 {selectedNode.data.location}</p>}
+                      <div className="flex gap-4 mt-3 text-xs text-white/50">
+                        <span><span className="text-primary font-bold">{selectedNode.data.publicRepos}</span> Repositories</span>
+                        <span><span className="text-primary font-bold">{selectedNode.data.followers}</span> Followers</span>
+                        <span><span className="text-primary font-bold">{selectedNode.data.following}</span> Following</span>
+                      </div>
+                    </div>
+                  )}
+                  {selectedNode.data.nodeType === 'language' && (
+                    <div className="space-y-2">
+                      <p>Technology cluster containing <span className="text-primary font-bold">{selectedNode.data.repoCount}</span> {selectedNode.data.repoCount === 1 ? 'repository' : 'repositories'} built with <span className="text-white font-semibold">{selectedNode.data.label}</span>.</p>
+                      {selectedNode.data.totalStars > 0 && <p className="text-xs text-white/40">⭐ {selectedNode.data.totalStars} total stars across all {selectedNode.data.label} projects</p>}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {selectedNode.data.repoNames?.slice(0, 5).map((name: string) => (
+                          <span key={name} className="text-[10px] px-2 py-1 bg-white/5 rounded-md border border-white/10 text-white/50 font-mono">{name}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {selectedNode.data.nodeType === 'repo' && (
+                    <div className="space-y-2">
+                      {selectedNode.data.description ? (
+                        <p>{selectedNode.data.description}</p>
+                      ) : (
+                        <p>A {selectedNode.data.language || ''} project{selectedNode.data.visibility === 'public' ? ', publicly available' : ''} on GitHub.</p>
+                      )}
+                      <div className="mt-3 space-y-1 text-xs text-white/40">
+                        {selectedNode.data.createdAt && <p>🚀 Created: {new Date(selectedNode.data.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
+                        {selectedNode.data.updatedAt && <p>🔄 Last Updated: {new Date(selectedNode.data.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
+                        {selectedNode.data.size > 0 && <p>📦 Size: {selectedNode.data.size > 1024 ? `${(selectedNode.data.size / 1024).toFixed(1)} MB` : `${selectedNode.data.size} KB`}</p>}
+                        {selectedNode.data.defaultBranch && <p>🌿 Branch: {selectedNode.data.defaultBranch}</p>}
+                        {selectedNode.data.openIssues > 0 && <p>📋 Open Issues: {selectedNode.data.openIssues}</p>}
+                        {selectedNode.data.hasPages && <p>🌐 GitHub Pages: Active</p>}
+                      </div>
+                      {selectedNode.data.topics?.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {selectedNode.data.topics.map((topic: string) => (
+                            <span key={topic} className="text-[10px] px-2 py-1 bg-primary/10 rounded-md border border-primary/20 text-primary/80 font-mono">{topic}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {!selectedNode.data.nodeType && (
+                    <p>Node inspection data loaded.</p>
+                  )}
+                </div>
               </section>
 
               <div className="grid grid-cols-2 gap-4">
