@@ -187,21 +187,21 @@ export default function App() {
       </ReactFlow>
 
       {/* Header Overlay */}
-      <div className="absolute top-6 left-6 z-10 glass p-6 rounded-2xl max-w-sm">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-primary/20 rounded-lg">
-            <Cpu className="text-primary" size={20} />
+      <div className="absolute top-3 left-3 md:top-6 md:left-6 z-10 glass p-3 md:p-6 rounded-2xl max-w-[200px] md:max-w-sm">
+        <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
+          <div className="p-1.5 md:p-2 bg-primary/20 rounded-lg">
+            <Cpu className="text-primary" size={16} />
           </div>
           <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-wider leading-none">Architect Ledger</h1>
-            <p className="text-[10px] text-white/40 uppercase tracking-widest mt-1 italic">Core System v1.0.0</p>
+            <h1 className="text-sm md:text-xl font-black text-white uppercase tracking-wider leading-none">Architect Ledger</h1>
+            <p className="text-[8px] md:text-[10px] text-white/40 uppercase tracking-widest mt-1 italic">Core System v1.0.0</p>
           </div>
         </div>
-        <p className="text-xs text-white/60 leading-relaxed mb-4 border-l-2 border-primary/40 pl-3">
+        <p className="hidden md:block text-xs text-white/60 leading-relaxed mb-4 border-l-2 border-primary/40 pl-3">
           Explore the live technical ecosystem fetched from your GitHub. 
           Draggable, zoomable, and fully inspection-ready.
         </p>
-        <div className="flex gap-2">
+        <div className="hidden md:flex gap-2">
           <span className="text-[10px] font-mono px-2 py-1 bg-white/5 rounded-md border border-white/10 uppercase text-white/40">TS_2.4.1</span>
           <span className="text-[10px] font-mono px-2 py-1 bg-white/5 rounded-md border border-white/10 uppercase text-white/40">NODE_V20</span>
         </div>
@@ -209,12 +209,12 @@ export default function App() {
 
       <GithubStatus username="Tamim544" />
 
-      <div className="absolute bottom-6 right-6 z-10 glass p-4 rounded-xl flex items-center gap-4 border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+      <div className="absolute bottom-3 right-3 md:bottom-6 md:right-6 z-10 glass p-2 md:p-4 rounded-xl flex items-center gap-2 md:gap-4 border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
         <div className="flex flex-col items-end">
-          <span className="text-[9px] uppercase tracking-widest text-white/30 font-mono">Status</span>
-          <span className="text-xs font-black uppercase text-green-500 tracking-tighter">System_Online</span>
+          <span className="text-[8px] md:text-[9px] uppercase tracking-widest text-white/30 font-mono">Status</span>
+          <span className="text-[10px] md:text-xs font-black uppercase text-green-500 tracking-tighter">System_Online</span>
         </div>
-        <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
+        <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-green-500 animate-pulse" />
       </div>
 
       <Terminal />
@@ -225,7 +225,7 @@ export default function App() {
             initial={{ opacity: 0, x: 400 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 400 }}
-            className="fixed top-6 right-6 bottom-6 w-full max-w-md z-40 glass rounded-2xl p-8 overflow-y-auto border-primary/20"
+            className="fixed inset-3 md:inset-auto md:top-6 md:right-6 md:bottom-6 w-auto md:w-full md:max-w-md z-40 glass rounded-2xl p-5 md:p-8 overflow-y-auto border-primary/20"
           >
             <div className="flex justify-between items-start mb-12">
               <div className="space-y-1">

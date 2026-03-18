@@ -7,7 +7,7 @@ export const GithubStatus = ({ username }: { username: string }) => {
   if (loading || !stats) return null;
 
   return (
-    <div className="absolute top-6 right-6 z-10 glass p-4 rounded-xl flex flex-col gap-2 min-w-[200px] border-accent/20">
+    <div className="hidden md:flex absolute top-6 right-6 z-10 glass p-4 rounded-xl flex-col gap-2 min-w-[200px] border-accent/20">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Github size={14} className="text-primary" />

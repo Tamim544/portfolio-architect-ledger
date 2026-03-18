@@ -27,9 +27,9 @@ export const Terminal = () => {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 left-6 z-50 glass p-3 rounded-full hover:bg-primary/20 transition-colors shadow-2xl"
+        className="fixed bottom-3 left-3 md:bottom-6 md:left-6 z-50 glass p-2.5 md:p-3 rounded-full hover:bg-primary/20 transition-colors shadow-2xl"
       >
-        <TerminalIcon size={24} className="text-primary" />
+        <TerminalIcon size={20} className="text-primary md:w-6 md:h-6" />
       </button>
 
       <AnimatePresence>
@@ -38,7 +38,7 @@ export const Terminal = () => {
             initial={{ opacity: 0, y: 100, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            className="fixed bottom-24 left-6 w-full max-w-md h-[400px] z-50 glass rounded-2xl overflow-hidden flex flex-col shadow-2xl border-primary/20"
+            className="fixed bottom-16 left-3 right-3 md:bottom-24 md:left-6 md:right-auto md:w-full md:max-w-md h-[300px] md:h-[400px] z-50 glass rounded-2xl overflow-hidden flex flex-col shadow-2xl border-primary/20"
           >
             <div className="p-3 bg-white/5 border-b border-white/10 flex justify-between items-center">
               <div className="flex items-center gap-2">
