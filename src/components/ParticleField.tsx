@@ -10,7 +10,7 @@ interface Particle {
   hue: number;
 }
 
-export const ParticleField = () => {
+export const ParticleField = ({ style = 'dots', count = 60 }: { style?: 'dots' | 'lines' | 'nebula'; count?: number }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export const ParticleField = () => {
 
     let animationId: number;
     const particles: Particle[] = [];
-    const PARTICLE_COUNT = 60;
+    const PARTICLE_COUNT = count;
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -40,7 +40,7 @@ export const ParticleField = () => {
         vy: (Math.random() - 0.5) * 0.3,
         size: Math.random() * 2 + 0.5,
         opacity: Math.random() * 0.3 + 0.05,
-        hue: Math.random() > 0.7 ? 200 : 217, // mix of cyan and blue
+        hue: style === 'nebula' ? Math.random() * 360 : style === 'lines' ? 217 : 200, // style-based hue
       });
     }
 
