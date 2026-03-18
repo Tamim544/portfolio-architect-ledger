@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -21,16 +22,60 @@
 
 /* Glassmorphism utility */
 .glass {
-  @apply backdrop-blur-md bg-white/5 border border-white/10;
+  @apply backdrop-blur-xl bg-white/[0.04] border border-white/[0.08];
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
   @apply bg-transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-white/20 rounded-full hover:bg-white/30;
+  @apply bg-white/15 rounded-full hover:bg-white/25;
+}
+
+/* ReactFlow node overrides */
+.react-flow__node {
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.react-flow__node:hover {
+  z-index: 10 !important;
+}
+.react-flow__node.selected {
+  box-shadow: 0 0 0 2px hsl(217 91% 60%), 0 0 30px rgba(59, 130, 246, 0.15);
+}
+
+/* Edge animation */
+.react-flow__edge-path {
+  stroke-linecap: round;
+}
+
+/* Controls styling */
+.react-flow__controls {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(15, 23, 42, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+.react-flow__controls-button {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  fill: rgba(255, 255, 255, 0.5) !important;
+}
+.react-flow__controls-button:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  fill: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* MiniMap styling */
+.react-flow__minimap {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(15, 23, 42, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
 }

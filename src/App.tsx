@@ -12,10 +12,31 @@ import type { Connection, Edge, Node } from 'reactflow';
 
 import 'reactflow/dist/style.css';
 import { useGithub } from './hooks/useGithub';
-import { Terminal } from './components/Terminal';
 import { GithubStatus } from './components/GithubStatus';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Cpu, Globe, Database, Star, GitBranch } from 'lucide-react';
+import { X, ExternalLink, Star, GitFork, Calendar, HardDrive, Tag, Globe } from 'lucide-react';
+
+// Language color map (matches GitHub's language colors)
+const langColors: Record<string, string> = {
+  TypeScript: '#3178c6',
+  JavaScript: '#f1e05a',
+  Python: '#3572A5',
+  Java: '#b07219',
+  'C++': '#f34b7d',
+  C: '#555555',
+  HTML: '#e34c26',
+  CSS: '#563d7c',
+  Kotlin: '#A97BFF',
+  Swift: '#F05138',
+  Go: '#00ADD8',
+  Rust: '#dea584',
+  Ruby: '#701516',
+  PHP: '#4F5D95',
+  'Jupyter Notebook': '#DA5B0B',
+  Other: '#8b949e',
+};
+
+const getLangColor = (lang: string) => langColors[lang] || langColors.Other;
 
 export default function App() {
   const { stats, repos, loading } = useGithub("Tamim544");
@@ -29,24 +50,33 @@ export default function App() {
       const newNodes: Node[] = [];
       const newEdges: Edge[] = [];
 
-      // Central Node: The User
       const centralNodeId = 'user-center';
       newNodes.push({
         id: centralNodeId,
         type: 'input',
         data: { 
-          label: `System Architect: ${stats?.name || 'Tamim Chowdhury'}`,
+          label: stats?.name || 'Tamim Chowdhury',
           nodeType: 'central',
           bio: stats?.bio,
           publicRepos: stats?.public_repos,
           followers: stats?.followers,
           following: stats?.following,
           location: stats?.location,
-          company: stats?.company,
+          avatarUrl: stats?.avatar_url,
           profileUrl: stats?.html_url,
         },
         position: { x: 500, y: 0 },
-        className: 'glass rounded-2xl px-8 py-4 text-primary font-black shadow-[0_0_50px_rgba(59,130,246,0.2)] border-primary/50 text-xl uppercase tracking-tighter',
+        style: {
+          background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04))',
+          border: '1px solid rgba(59,130,246,0.3)',
+          borderRadius: '16px',
+          padding: '12px 24px',
+          color: '#e2e8f0',
+          fontWeight: 700,
+          fontSize: '14px',
+          backdropFilter: 'blur(12px)',
+          boxShadow: '0 0 40px rgba(59,130,246,0.08)',
+        },
       });
 
       // Group repos by language
@@ -65,8 +95,8 @@ export default function App() {
         const langNodeId = `lang-${lang}`;
         const x = 500 + radius * Math.cos(langIdx * angleStep);
         const y = 0 + radius * Math.sin(langIdx * angleStep);
+        const color = getLangColor(lang);
 
-        // Language Node
         newNodes.push({
           id: langNodeId,
           data: { 
@@ -75,26 +105,36 @@ export default function App() {
             repoCount: reposByLanguage[lang].length,
             repoNames: reposByLanguage[lang].map((r: any) => r.name),
             totalStars: reposByLanguage[lang].reduce((sum: number, r: any) => sum + (r.stargazers_count || 0), 0),
+            color,
           },
           position: { x, y },
-          className: 'glass rounded-xl px-6 py-3 border-accent/50 text-sm font-bold uppercase tracking-wider',
+          style: {
+            background: 'rgba(255,255,255,0.03)',
+            border: `1px solid ${color}40`,
+            borderRadius: '12px',
+            padding: '8px 20px',
+            color: '#e2e8f0',
+            fontWeight: 600,
+            fontSize: '12px',
+            backdropFilter: 'blur(8px)',
+            boxShadow: `0 0 20px ${color}08`,
+          },
         });
 
-        // Edge from Center to Language
         newEdges.push({
           id: `e-center-${lang}`,
           source: centralNodeId,
           target: langNodeId,
           animated: true,
-          style: { stroke: '#3b82f6', strokeWidth: 2, opacity: 0.4 },
+          style: { stroke: color, strokeWidth: 1.5, opacity: 0.3 },
         });
 
-        // Project Nodes for this language
+        // Project Nodes
         const projectRadius = 200;
-        const projectRepos = reposByLanguage[lang].slice(0, 5); // Limit to top 5 per lang for clarity
+        const projectRepos = reposByLanguage[lang].slice(0, 5);
         const projectAngleStep = (Math.PI / 2) / (projectRepos.length || 1);
 
-        projectRepos.forEach((repo, repoIdx) => {
+        projectRepos.forEach((repo: any, repoIdx: number) => {
           const repoNodeId = `repo-${repo.name}`;
           const rx = x + projectRadius * Math.cos(langIdx * angleStep + (repoIdx - projectRepos.length / 2) * projectAngleStep);
           const ry = y + projectRadius * Math.sin(langIdx * angleStep + (repoIdx - projectRepos.length / 2) * projectAngleStep);
@@ -114,20 +154,28 @@ export default function App() {
               size: repo.size,
               defaultBranch: repo.default_branch,
               topics: repo.topics,
-              visibility: repo.visibility,
               hasPages: repo.has_pages,
               openIssues: repo.open_issues_count,
             },
             position: { x: rx, y: ry },
-            className: 'glass rounded-lg px-4 py-2 text-[11px] border-white/10 hover:border-primary/50 transition-all cursor-pointer shadow-lg',
+            style: {
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '10px',
+              padding: '6px 14px',
+              color: '#cbd5e1',
+              fontSize: '11px',
+              fontWeight: 500,
+              backdropFilter: 'blur(8px)',
+              cursor: 'pointer',
+            },
           });
 
-          // Edge from Language to Repo
           newEdges.push({
             id: `e-${lang}-${repo.name}`,
             source: langNodeId,
             target: repoNodeId,
-            style: { stroke: '#94a3b8', strokeWidth: 1, opacity: 0.2 },
+            style: { stroke: '#475569', strokeWidth: 1, opacity: 0.2 },
           });
         });
       });
@@ -146,19 +194,25 @@ export default function App() {
     setSelectedNode(node);
   };
 
-  const launchProtocol = () => {
-    if (selectedNode?.data?.url) {
-      window.open(selectedNode.data.url, '_blank');
-    }
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('en-US', { 
+      year: 'numeric', month: 'short', day: 'numeric' 
+    });
+  };
+
+  const formatSize = (kb: number) => {
+    if (kb > 1024) return `${(kb / 1024).toFixed(1)} MB`;
+    return `${kb} KB`;
   };
 
   return (
     <div className="w-screen h-screen bg-background text-foreground font-sans overflow-hidden">
+      {/* Loading */}
       {loading && (
         <div className="absolute inset-0 z-[100] bg-background flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-[10px] uppercase tracking-[0.4em] text-primary animate-pulse">Initializing_Sync_Protocol...</p>
+            <div className="w-10 h-10 border-2 border-primary/40 border-t-primary rounded-full animate-spin" />
+            <p className="text-xs text-white/40 font-medium">Loading repositories...</p>
           </div>
         </div>
       )}
@@ -172,183 +226,248 @@ export default function App() {
         onNodeClick={onNodeClick}
         fitView
       >
-        <Controls className="!bg-background/80 !border-secondary !shadow-2xl" />
+        <Controls />
         <MiniMap 
-          className="!bg-background/80 !border-secondary !shadow-2xl !bottom-24 !right-6 rounded-2xl overflow-hidden" 
           nodeStrokeColor="#3b82f6"
-          maskColor="rgba(0, 0, 0, 0.5)"
+          maskColor="rgba(0, 0, 0, 0.6)"
+          style={{ bottom: 80, right: 24 }}
         />
         <Background 
           variant={BackgroundVariant.Dots} 
-          gap={24} 
-          size={1} 
+          gap={20} 
+          size={0.8} 
           color="#1e293b" 
         />
       </ReactFlow>
 
-      {/* Header Overlay */}
-      <div className="absolute top-3 left-3 md:top-6 md:left-6 z-10 glass p-3 md:p-6 rounded-2xl max-w-[200px] md:max-w-sm">
-        <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
-          <div className="p-1.5 md:p-2 bg-primary/20 rounded-lg">
-            <Cpu className="text-primary" size={16} />
-          </div>
+      {/* Header — clean branding */}
+      <div className="absolute top-3 left-3 md:top-6 md:left-6 z-10 glass px-4 py-3 md:px-5 md:py-4 rounded-xl">
+        <div className="flex items-center gap-3">
+          {stats?.avatar_url && (
+            <img 
+              src={stats.avatar_url} 
+              alt={stats?.name || 'Profile'}
+              className="hidden md:block w-9 h-9 rounded-full ring-2 ring-primary/30"
+            />
+          )}
           <div>
-            <h1 className="text-sm md:text-xl font-black text-white uppercase tracking-wider leading-none">Architect Ledger</h1>
-            <p className="text-[8px] md:text-[10px] text-white/40 uppercase tracking-widest mt-1 italic">Core System v1.0.0</p>
+            <h1 className="text-sm md:text-base font-bold text-white leading-tight">
+              {stats?.name || 'Tamim Chowdhury'}
+            </h1>
+            <p className="text-[10px] md:text-xs text-white/40 leading-tight mt-0.5">
+              {stats?.bio || 'Developer'}
+            </p>
           </div>
-        </div>
-        <p className="hidden md:block text-xs text-white/60 leading-relaxed mb-4 border-l-2 border-primary/40 pl-3">
-          Explore the live technical ecosystem fetched from your GitHub. 
-          Draggable, zoomable, and fully inspection-ready.
-        </p>
-        <div className="hidden md:flex gap-2">
-          <span className="text-[10px] font-mono px-2 py-1 bg-white/5 rounded-md border border-white/10 uppercase text-white/40">TS_2.4.1</span>
-          <span className="text-[10px] font-mono px-2 py-1 bg-white/5 rounded-md border border-white/10 uppercase text-white/40">NODE_V20</span>
         </div>
       </div>
 
       <GithubStatus username="Tamim544" />
 
-      <div className="absolute bottom-3 right-3 md:bottom-6 md:right-6 z-10 glass p-2 md:p-4 rounded-xl flex items-center gap-2 md:gap-4 border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
-        <div className="flex flex-col items-end">
-          <span className="text-[8px] md:text-[9px] uppercase tracking-widest text-white/30 font-mono">Status</span>
-          <span className="text-[10px] md:text-xs font-black uppercase text-green-500 tracking-tighter">System_Online</span>
-        </div>
-        <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-green-500 animate-pulse" />
-      </div>
-
-      <Terminal />
-
+      {/* Node Detail Sidebar */}
       <AnimatePresence>
         {selectedNode && (
           <motion.div
-            initial={{ opacity: 0, x: 400 }}
+            initial={{ opacity: 0, x: 300 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 400 }}
-            className="fixed inset-3 md:inset-auto md:top-6 md:right-6 md:bottom-6 w-auto md:w-full md:max-w-md z-40 glass rounded-2xl p-5 md:p-8 overflow-y-auto border-primary/20"
+            exit={{ opacity: 0, x: 300 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-3 md:inset-auto md:top-4 md:right-4 md:bottom-4 w-auto md:w-[380px] z-40 bg-[#0f172a]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] overflow-y-auto shadow-2xl"
           >
-            <div className="flex justify-between items-start mb-12">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-primary" />
-                  <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-primary/60">Node_Protocol_Active</span>
-                </div>
-                <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none">{selectedNode.data.label}</h2>
-              </div>
-              <button 
-                onClick={() => setSelectedNode(null)}
-                className="p-2 hover:bg-white/5 rounded-full transition-colors text-white/40 hover:text-white"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-8">
-              <section className="p-8 bg-white/5 rounded-2xl border border-white/5 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <Globe size={120} />
-                </div>
-                <div className="text-sm leading-relaxed text-white/70 relative z-10">
-                  {selectedNode.data.nodeType === 'central' && (
-                    <div className="space-y-2">
-                      <p>{selectedNode.data.bio || 'System Architect & Full-Stack Developer'}</p>
-                      {selectedNode.data.location && <p className="text-white/40 text-xs">📍 {selectedNode.data.location}</p>}
-                      <div className="flex gap-4 mt-3 text-xs text-white/50">
-                        <span><span className="text-primary font-bold">{selectedNode.data.publicRepos}</span> Repositories</span>
-                        <span><span className="text-primary font-bold">{selectedNode.data.followers}</span> Followers</span>
-                        <span><span className="text-primary font-bold">{selectedNode.data.following}</span> Following</span>
-                      </div>
+            <div className="p-5 md:p-6">
+              {/* Header */}
+              <div className="flex justify-between items-start mb-6">
+                <div className="min-w-0 flex-1 mr-3">
+                  <h2 className="text-lg font-bold text-white leading-tight truncate">
+                    {selectedNode.data.label}
+                  </h2>
+                  {selectedNode.data.nodeType === 'language' && (
+                    <p className="text-xs text-white/40 mt-1">
+                      {selectedNode.data.repoCount} {selectedNode.data.repoCount === 1 ? 'repository' : 'repositories'}
+                    </p>
+                  )}
+                  {selectedNode.data.nodeType === 'repo' && selectedNode.data.language && (
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <div 
+                        className="w-2.5 h-2.5 rounded-full" 
+                        style={{ backgroundColor: getLangColor(selectedNode.data.language) }}
+                      />
+                      <span className="text-xs text-white/40">{selectedNode.data.language}</span>
                     </div>
                   )}
-                  {selectedNode.data.nodeType === 'language' && (
-                    <div className="space-y-2">
-                      <p>Technology cluster containing <span className="text-primary font-bold">{selectedNode.data.repoCount}</span> {selectedNode.data.repoCount === 1 ? 'repository' : 'repositories'} built with <span className="text-white font-semibold">{selectedNode.data.label}</span>.</p>
-                      {selectedNode.data.totalStars > 0 && <p className="text-xs text-white/40">⭐ {selectedNode.data.totalStars} total stars across all {selectedNode.data.label} projects</p>}
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {selectedNode.data.repoNames?.slice(0, 5).map((name: string) => (
-                          <span key={name} className="text-[10px] px-2 py-1 bg-white/5 rounded-md border border-white/10 text-white/50 font-mono">{name}</span>
+                </div>
+                <button 
+                  onClick={() => setSelectedNode(null)}
+                  className="p-1.5 hover:bg-white/5 rounded-lg transition-colors text-white/30 hover:text-white/60 flex-shrink-0"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Content by node type */}
+              <div className="space-y-5">
+                
+                {/* Central Node */}
+                {selectedNode.data.nodeType === 'central' && (
+                  <>
+                    {selectedNode.data.avatarUrl && (
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={selectedNode.data.avatarUrl} 
+                          alt="Profile"
+                          className="w-14 h-14 rounded-full ring-2 ring-primary/20"
+                        />
+                        <div>
+                          <p className="text-sm text-white/70">{selectedNode.data.bio || 'Developer'}</p>
+                          {selectedNode.data.location && (
+                            <p className="text-xs text-white/30 mt-1 flex items-center gap-1">
+                              <Globe size={11} />
+                              {selectedNode.data.location}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { label: 'Repos', value: selectedNode.data.publicRepos },
+                        { label: 'Followers', value: selectedNode.data.followers },
+                        { label: 'Following', value: selectedNode.data.following },
+                      ].map(item => (
+                        <div key={item.label} className="text-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                          <p className="text-base font-bold text-white">{item.value}</p>
+                          <p className="text-[10px] text-white/30 mt-0.5">{item.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {selectedNode.data.profileUrl && (
+                      <a 
+                        href={selectedNode.data.profileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium transition-all border border-primary/20"
+                      >
+                        <ExternalLink size={14} />
+                        View GitHub Profile
+                      </a>
+                    )}
+                  </>
+                )}
+
+                {/* Language Node */}
+                {selectedNode.data.nodeType === 'language' && (
+                  <>
+                    <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: selectedNode.data.color || getLangColor(selectedNode.data.label) }}
+                        />
+                        <span className="text-sm font-medium text-white">{selectedNode.data.label}</span>
+                      </div>
+                      <p className="text-xs text-white/50 leading-relaxed">
+                        {selectedNode.data.repoCount} {selectedNode.data.repoCount === 1 ? 'project' : 'projects'} built with {selectedNode.data.label}
+                        {selectedNode.data.totalStars > 0 && `, earning ${selectedNode.data.totalStars} total stars`}.
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-white/30 mb-2 font-medium">Projects</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedNode.data.repoNames?.map((name: string) => (
+                          <span key={name} className="text-[10px] px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/50">
+                            {name}
+                          </span>
                         ))}
                       </div>
                     </div>
-                  )}
-                  {selectedNode.data.nodeType === 'repo' && (
-                    <div className="space-y-2">
-                      {selectedNode.data.description ? (
-                        <p>{selectedNode.data.description}</p>
-                      ) : (
-                        <p>A {selectedNode.data.language || ''} project{selectedNode.data.visibility === 'public' ? ', publicly available' : ''} on GitHub.</p>
-                      )}
-                      <div className="mt-3 space-y-1 text-xs text-white/40">
-                        {selectedNode.data.createdAt && <p>🚀 Created: {new Date(selectedNode.data.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
-                        {selectedNode.data.updatedAt && <p>🔄 Last Updated: {new Date(selectedNode.data.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>}
-                        {selectedNode.data.size > 0 && <p>📦 Size: {selectedNode.data.size > 1024 ? `${(selectedNode.data.size / 1024).toFixed(1)} MB` : `${selectedNode.data.size} KB`}</p>}
-                        {selectedNode.data.defaultBranch && <p>🌿 Branch: {selectedNode.data.defaultBranch}</p>}
-                        {selectedNode.data.openIssues > 0 && <p>📋 Open Issues: {selectedNode.data.openIssues}</p>}
-                        {selectedNode.data.hasPages && <p>🌐 GitHub Pages: Active</p>}
+                  </>
+                )}
+
+                {/* Repo Node */}
+                {selectedNode.data.nodeType === 'repo' && (
+                  <>
+                    {/* Description */}
+                    <p className="text-sm text-white/60 leading-relaxed">
+                      {selectedNode.data.description || `A ${selectedNode.data.language || ''} project on GitHub.`}
+                    </p>
+
+                    {/* Stats */}
+                    {(selectedNode.data.stars > 0 || selectedNode.data.forks > 0) && (
+                      <div className="flex items-center gap-4">
+                        {selectedNode.data.stars > 0 && (
+                          <div className="flex items-center gap-1.5 text-xs text-white/50">
+                            <Star size={13} className="text-amber-400/70" />
+                            <span>{selectedNode.data.stars}</span>
+                          </div>
+                        )}
+                        {selectedNode.data.forks > 0 && (
+                          <div className="flex items-center gap-1.5 text-xs text-white/50">
+                            <GitFork size={13} className="text-white/30" />
+                            <span>{selectedNode.data.forks}</span>
+                          </div>
+                        )}
                       </div>
-                      {selectedNode.data.topics?.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {selectedNode.data.topics.map((topic: string) => (
-                            <span key={topic} className="text-[10px] px-2 py-1 bg-primary/10 rounded-md border border-primary/20 text-primary/80 font-mono">{topic}</span>
-                          ))}
+                    )}
+
+                    {/* Metadata */}
+                    <div className="space-y-2 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      {selectedNode.data.createdAt && (
+                        <div className="flex items-center gap-2 text-xs text-white/40">
+                          <Calendar size={12} />
+                          <span>Created {formatDate(selectedNode.data.createdAt)}</span>
+                        </div>
+                      )}
+                      {selectedNode.data.updatedAt && (
+                        <div className="flex items-center gap-2 text-xs text-white/40">
+                          <Calendar size={12} />
+                          <span>Updated {formatDate(selectedNode.data.updatedAt)}</span>
+                        </div>
+                      )}
+                      {selectedNode.data.size > 0 && (
+                        <div className="flex items-center gap-2 text-xs text-white/40">
+                          <HardDrive size={12} />
+                          <span>{formatSize(selectedNode.data.size)}</span>
+                        </div>
+                      )}
+                      {selectedNode.data.hasPages && (
+                        <div className="flex items-center gap-2 text-xs text-white/40">
+                          <Globe size={12} />
+                          <span>GitHub Pages active</span>
                         </div>
                       )}
                     </div>
-                  )}
-                  {!selectedNode.data.nodeType && (
-                    <p>Node inspection data loaded.</p>
-                  )}
-                </div>
-              </section>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-6 glass rounded-2xl text-left border-white/5 group hover:border-primary/40 transition-all">
-                  <Database size={16} className="text-primary mb-3 opacity-40" />
-                  <span className="block text-[10px] uppercase text-white/30 mb-2 tracking-widest font-mono">Data_Source</span>
-                  <span className="text-xs font-bold text-white italic uppercase tracking-tighter">GITHUB_FETCH_V3</span>
-                </div>
-                <div className="p-6 glass rounded-2xl text-left border-white/5 group hover:border-primary/40 transition-all">
-                  <Globe size={16} className="text-primary mb-3 opacity-40" />
-                  <span className="block text-[10px] uppercase text-white/30 mb-2 tracking-widest font-mono">Sync_Status</span>
-                  <span className="text-xs font-bold text-green-400 italic uppercase tracking-tighter">OPTIMIZED</span>
-                </div>
+                    {/* Topics */}
+                    {selectedNode.data.topics?.length > 0 && (
+                      <div>
+                        <p className="text-[11px] text-white/30 mb-2 font-medium flex items-center gap-1">
+                          <Tag size={10} />
+                          Topics
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedNode.data.topics.map((topic: string) => (
+                            <span key={topic} className="text-[10px] px-2.5 py-1 rounded-lg bg-primary/[0.06] border border-primary/15 text-primary/70">
+                              {topic}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* View on GitHub button */}
+                    {selectedNode.data.url && (
+                      <a 
+                        href={selectedNode.data.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium transition-all border border-primary/20"
+                      >
+                        <ExternalLink size={14} />
+                        View on GitHub
+                      </a>
+                    )}
+                  </>
+                )}
               </div>
-
-              {selectedNode.data.stars !== undefined && (
-                <div className="flex items-center gap-6 px-4">
-                  <div className="flex items-center gap-2">
-                    <Star size={14} className="text-yellow-500" />
-                    <span className="text-xs font-mono font-bold text-white/80">{selectedNode.data.stars}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <GitBranch size={14} className="text-primary" />
-                    <span className="text-xs font-mono font-bold text-white/80">{selectedNode.data.forks}</span>
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between text-[10px] font-mono text-white/30 uppercase tracking-[0.2em] px-2">
-                  <span>Integrity_Check</span>
-                  <span>100%</span>
-                </div>
-                <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: "100%" }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-primary to-accent" 
-                  />
-                </div>
-              </div>
-
-              <button 
-                onClick={launchProtocol}
-                disabled={!selectedNode.data.url}
-                className="w-full py-5 bg-primary text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-primary/80 transition-all shadow-[0_10px_30px_rgba(59,130,246,0.3)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Launch_Integration_Protocol
-              </button>
             </div>
           </motion.div>
         )}
